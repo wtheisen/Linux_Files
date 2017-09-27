@@ -7,7 +7,9 @@ PROMPT='%F{cyan}%B%c%b%f %0(?.%F{green}%B➜ %b%f.%F{red}%B➜ %b%f)'
 RPROMPT='%F{red}%B[%n - %*]%b%f'
 
 autoload -U compinit && compinit
+zstyle ':completion:*' matcher-list 'm:{a-zA-Z}={A-Za-z}'
 zstyle ':completion:*' menu select
+setopt menu_complete
 
 source /home/bilbo991/.zsh/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
 source ~/.zsh/zsh-autosuggestions/zsh-autosuggestions.zsh
