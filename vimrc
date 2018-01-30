@@ -6,6 +6,25 @@ call vundle#begin()
 
 Plugin 'VundleVim/Vundle.vim'
 
+"syntax highlighting for coffee-script
+Plugin 'kchmck/vim-coffee-script'
+
+"few QOL changes, like cursor shape changes based on mode
+Plugin 'wincent/terminus'
+
+"tagbar to use when working on large projects
+Plugin 'ludovicchabant/vim-gutentags'
+Plugin 'majutsushi/tagbar'
+
+"Plugin that extends the number of actions that can be repeated with '.'
+Plugin 'tpope/vim-repeat'
+
+"Plugin that adds macros for modifying surrounding ', ", (, etc...
+Plugin 'tpope/vim-surround'
+
+"Plugin that provides useful features when editing latex files
+Plugin 'lervag/vimtex'
+
 "Removes the annoying swap messages
 Plugin 'gioele/vim-autoswap'
 
@@ -13,7 +32,8 @@ Plugin 'gioele/vim-autoswap'
 Plugin 'alvan/vim-closetag'
 
 "easy searching and opening of files and buffers
-Plugin 'ctrlpvim/ctrlp.vim'
+Plugin 'junegunn/fzf'
+Plugin 'junegunn/fzf.vim'
 
 "Plugin for snippets for various languages
 Plugin 'SirVer/ultisnips'
@@ -23,7 +43,7 @@ Plugin 'honza/vim-snippets'
 Plugin 'jiangmiao/auto-pairs'
 
 "nested parens will be given different colors
-Plugin 'kien/rainbow_parentheses.vim'
+Plugin 'junegunn/rainbow_parentheses.vim'
 
 "allows mass commenting and uncommenting
 Plugin 'tpope/vim-commentary'
@@ -67,6 +87,7 @@ filetype plugin indent on
 
 let g:airline_powerline_fonts = 1
 
+"automatically remove trailing whitespace on save
 autocmd BufEnter * EnableStripWhitespaceOnSave
 
 if has("autocmd")
@@ -74,15 +95,8 @@ if has("autocmd")
         \| exe "normal! g'\"" | endif
 endif
 
-"Changes the shape of the cursor depending on the mode, hardcoded for xfce4
-if has("autocmd")
-  au InsertEnter * silent execute "!sed -i.bak -e 's/TERMINAL_CURSOR_SHAPE_BLOCK/TERMINAL_CURSOR_SHAPE_IBEAM/' ~/.config/xfce4/terminal/terminalrc"
-  au InsertLeave * silent execute "!sed -i.bak -e 's/TERMINAL_CURSOR_SHAPE_IBEAM/TERMINAL_CURSOR_SHAPE_BLOCK/' ~/.config/xfce4/terminal/terminalrc"
-  au VimLeave * silent execute "!sed -i.bak -e 's/TERMINAL_CURSOR_SHAPE_IBEAM/TERMINAL_CURSOR_SHAPE_BLOCK/' ~/.config/xfce4/terminal/terminalrc"
-endif
-
 "settings for html tag closing
-let g:closetag_filenames = "*.html"
+let g:closetag_filenames = "*.html, *.php"
 
 "vim airline settings
 let g:airline#extensions#tabline#enabled = 1
@@ -134,28 +148,84 @@ set colorcolumn=80
 set background=dark
 let g:gruvbox_contrast_dark='hard'
 let g:gruvbox_contrast_light='hard'
+
+"enable true color support
+set termguicolors
 colorscheme gruvbox
 syntax on
-:highlight Normal ctermbg=black
-:highlight SignColumn ctermbg=black
-set term=screen-256color
+
+"automatically set the syntax of bison files to c
+autocmd BufNewFile,BufRead *.bison set syntax=c
+
+"enable italics
+set t_ZH=[3m
+set t_ZR=[23m
+
+let g:gitgutter_override_sign_column_highlight=0
+let g:SignatureMarkTextHLDynamic=0
+
+"enable bolds and italics for comments
+let g:gruvbox_bold=1
+let g:gruvbox_italic=1
+highlight Comment cterm=italic
+
+"highlight the line you're on, and set hybrid line numbers
+set cursorline
+set re=1
+set number relativenumber
+
+"disable the mouse settings from terminus
+let g:TerminusMouse=0
+
+"turn on and rice code folding based on syntax
+set foldmethod=syntax
+function! NeatFoldText() "{{{2
+    let line = ' ' . substitute(getline(v:foldstart), '^\s*"\?\s*\|\s*"\?\s*{{' . '{\d*\s*', '', 'g') . ' '
+    let lines_count = v:foldend - v:foldstart + 1
+    let lines_count_text = '| ' . printf("%10s", lines_count . ' lines') . ' |'
+    let foldchar = matchstr(&fillchars, 'fold:\zs.')
+    let foldtextstart = strpart('+' . repeat(foldchar, v:foldlevel*2) . line, 0, (80*2)/3)
+    let foldtextend = lines_count_text . '-- } --+'
+    let foldtextlength = strlen(substitute(foldtextstart . foldtextend, '.', 'x', 'g')) + &foldcolumn
+    return foldtextstart . repeat('-', 80-foldtextlength) . foldtextend . repeat(' ', 80)
+endfunction
+set foldtext=NeatFoldText()
+" }}}2
+
+"more color changes to be black and edgy like my soul
+:highlight Folded guibg=black
+:highlight Folded guifg=grey
+:highlight Normal guibg=black
+:highlight SignColumn guibg=black
+
+"gitgutter ricing
+:highlight GitGutterChange guibg=black ctermfg=yellow
+:highlight GitGutterAdd guibg=black guifg=green
+:highlight GitGutterDelete guibg=black guifg=red
+:highlight GitGutterChangeDelete guibg=black guifg=cyan
+let g:gitgutter_sign_added="●"
+let g:gitgutter_sign_modified="●"
+let g:gitgutter_sign_removed="●"
+let g:gitgutter_sign_modified_removed="●"
+let g:gitgutter_sign_removed_first_line="●"
 
 "rainbow parens set to always be on
-au VimEnter * RainbowParenthesesToggle
-au Syntax * RainbowParenthesesLoadRound
-au Syntax * RainbowParenthesesLoadSquare
-au Syntax * RainbowParenthesesLoadBraces
+au VimEnter * RainbowParentheses
 
 "ale linter signs customization
-let g:ale_sign_error = '✗'
+let g:ale_sign_error ='✕'
 let g:ale_sign_warning = '⚠'
-hi ALEErrorSign ctermbg=black ctermfg=196
-hi ALEWarningSign ctermbg=black ctermfg=226
+hi ALEErrorSign guibg=black guifg=red
+hi ALEWarningSign guibg=black guifg=yellow
 
 "custom hotkeys
 "switches ; to : in normal mode
 nnoremap ; :
+nnoremap p P
+nnoremap P p
+nnoremap zz zA
+nnoremap <C-p> :FZF<cr>
+nnoremap <Space> :Buffers<cr>
 
 inoremap <expr> <Down> pumvisible() ? "\<C-n>" : "\<Down>"
 inoremap <expr> <cr> pumvisible() ? "\<C-y>\<cr>" : "\<cr>"
-" let g:UltiSnipsExpandTrigger="<cr>"
