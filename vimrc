@@ -6,13 +6,6 @@ call vundle#begin()
 
 Plugin 'VundleVim/Vundle.vim'
 
-"syntax highlighting for coffee-script
-Plugin 'kchmck/vim-coffee-script'
-
-"few QOL changes, like cursor shape changes based on mode
-Plugin 'wincent/terminus'
-
-"tagbar to use when working on large projects
 Plugin 'ludovicchabant/vim-gutentags'
 Plugin 'majutsushi/tagbar'
 
@@ -22,7 +15,7 @@ Plugin 'tpope/vim-repeat'
 "Plugin that adds macros for modifying surrounding ', ", (, etc...
 Plugin 'tpope/vim-surround'
 
-"Plugin that provides useful features when editing latex files
+"Plugin that provides use features when editing latex files
 Plugin 'lervag/vimtex'
 
 "Removes the annoying swap messages
@@ -76,18 +69,52 @@ Plugin 'kshenoy/vim-signature'
 Plugin 'ryanoasis/vim-devicons'
 
 "helps with aligning text
-Plugin 'godlygeek/tabular'
+Plugin 'junegunn/vim-easy-align'
 
 "Asynchronous error checking
 Plugin 'w0rp/ale'
 
+"Org mode folding for vim
+Plugin 'jceb/vim-orgmode'
+
+"Unix commands in vim
+Plugin 'tpope/vim-eunuch'
+
+"Makes movement easier to see
+Plugin 'easymotion/vim-easymotion'
+
+"Provides cursor shape changes and improved pasting
+Plugin 'wincent/terminus'
+
+"Provides additional text objects
+Plugin 'wellle/targets.vim'
+
+"Git wrapper
+Plugin 'tpope/vim-fugitive'
+
+"Plugin to stop myself from using hjkl so much
+Plugin 'takac/vim-hardtime'
+
+"Session management in vim
+Plugin 'tpope/vim-obsession'
+
+"Extra mappings
+Plugin 'tpope/vim-unimpaired'
+
+"extra movement
+Plugin 'justinmk/vim-sneak'
 call vundle#end()
 
 filetype plugin indent on
 
+let g:TerminusMouse = 0
 let g:airline_powerline_fonts = 1
+" let g:hardtime_default_on = 1
+set mouse=a
+set so=999
+let g:sneak#s_next = 1
+let g:list_of_insert_keys = []
 
-"automatically remove trailing whitespace on save
 autocmd BufEnter * EnableStripWhitespaceOnSave
 
 if has("autocmd")
@@ -148,36 +175,22 @@ set colorcolumn=80
 set background=dark
 let g:gruvbox_contrast_dark='hard'
 let g:gruvbox_contrast_light='hard'
-
-"enable true color support
 set termguicolors
 colorscheme gruvbox
 syntax on
-
-"automatically set the syntax of bison files to c
 autocmd BufNewFile,BufRead *.bison set syntax=c
+autocmd BufNewFile,BufRead *.py set foldmethod=indent
 
-"enable italics
 set t_ZH=[3m
 set t_ZR=[23m
 
 let g:gitgutter_override_sign_column_highlight=0
 let g:SignatureMarkTextHLDynamic=0
-
-"enable bolds and italics for comments
 let g:gruvbox_bold=1
 let g:gruvbox_italic=1
 highlight Comment cterm=italic
-
-"highlight the line you're on, and set hybrid line numbers
-set cursorline
 set re=1
-set number relativenumber
 
-"disable the mouse settings from terminus
-let g:TerminusMouse=0
-
-"turn on and rice code folding based on syntax
 set foldmethod=syntax
 function! NeatFoldText() "{{{2
     let line = ' ' . substitute(getline(v:foldstart), '^\s*"\?\s*\|\s*"\?\s*{{' . '{\d*\s*', '', 'g') . ' '
@@ -192,7 +205,6 @@ endfunction
 set foldtext=NeatFoldText()
 " }}}2
 
-"more color changes to be black and edgy like my soul
 :highlight Folded guibg=black
 :highlight Folded guifg=grey
 :highlight Normal guibg=black
@@ -218,14 +230,58 @@ let g:ale_sign_warning = '⚠'
 hi ALEErrorSign guibg=black guifg=red
 hi ALEWarningSign guibg=black guifg=yellow
 
+set number relativenumber
+
+augroup numbertoggle
+  autocmd!
+  autocmd BufEnter,FocusGained,InsertLeave * set relativenumber
+  autocmd BufLeave,FocusLost,InsertEnter   * set norelativenumber
+augroup END
+
+set cursorline
+
+let g:ale_linters = {'.js': ['eslint']}
+
 "custom hotkeys
 "switches ; to : in normal mode
-nnoremap ; :
+noremap ; :
+noremap : ;
 nnoremap p P
 nnoremap P p
 nnoremap zz zA
+
 nnoremap <C-p> :FZF<cr>
-nnoremap <Space> :Buffers<cr>
+nnoremap <C-b> :Buffers<cr>
+nnoremap <C-m> :Marks<cr>
+
+noremap <Left> :above vnew <cr>
+noremap <Right> :below vnew<cr>
+noremap <Up> :above new<cr>
+noremap <Down> :below new<cr>
+
+nnoremap <C-j> <C-w><C-j>
+nnoremap <C-k> <C-w><C-k>
+nnoremap <C-l> <C-w><C-l>
+nnoremap <C-h> <C-w><C-h>
+
+let mapleader = " "
+map <Leader> <Plug>(easymotion-prefix)
 
 inoremap <expr> <Down> pumvisible() ? "\<C-n>" : "\<Down>"
 inoremap <expr> <cr> pumvisible() ? "\<C-y>\<cr>" : "\<cr>"
+
+
+noremap	<LeftMouse>	<nop>
+noremap	<LeftDrag> <nop>
+noremap	<LeftRelease> <nop>
+noremap	<RightMouse> <nop>
+noremap	<RightDrag> <nop>
+noremap	<RightRelease> <nop>
+noremap	g<LeftMouse> <nop>
+noremap	g<RightMouse> <nop>
+noremap! <LeftMouse> <nop>
+noremap! <LeftDrag> <nop>
+noremap! <LeftRelease> <nop>
+noremap! <RightMouse> <nop>
+noremap! <RightDrag> <nop>
+noremap! <RightRelease> <nop>
